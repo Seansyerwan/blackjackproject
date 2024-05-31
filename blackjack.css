@@ -1,0 +1,29 @@
+*{
+    font-family:cursive;
+}
+
+
+div, form{
+    display:none;
+}
+
+body{
+    background-image: url("blackjack_table.png");
+    background-size:cover;
+    background-repeat: no-repeat;
+}
+
+
+#start, #submit{
+    color:rgb(43, 180, 61);
+    background: rgb(255, 238, 0);
+}
+
+.numberText{
+    color:aqua;
+}
+.game{
+    border:2px;
+    border-radius: 2px;
+    border-color:black;
+}

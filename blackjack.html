@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>
+        Blackjack game using TypeScript
+    </title>
+
+    <link rel="stylesheet" href="blackjack.css">
+    
+</head>
+
+<body>
+
+
+    <h4 id="chipTotal">Chips: 10000</h4>
+
+<button id="start" onclick="showWager()">click to start</button>
+
+    <form id="chipsWagered" onsubmit="showGame();return false">
+        <label for="chipsIn">How many chips do you want to wager?</label><br>
+
+            <input type="text" id="chipsIn">
+        <button type="submit" id="submit">Submit</button>
+        
+    </form>
+
+<div id="game">
+    
+    <h1 id="dealerCards" class="numberText"></h1></br>
+    <h1 id="dealerTotal" class="numberText"></h1></br>
+
+    <h1 id="playerCards" class="numberText"></h1></br>
+    <h1 id="playerTotal" class="numberText"></h1></br>
+
+    <button id="draw" onClick="draw()">Hit me</button> 
+    <button id="doubleDown" onClick="doubleDown()">Double Down</button> 
+    <button id="stand" onClick="stand()">Stand</button>
+
+    <p id="result"></p>
+</div>
+
+<button id="playAgain"onClick="playAgain()">Play again</button>
+
+<script src="blackjack.js"> </script>
+
+
+</body>
+</html>
