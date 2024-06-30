@@ -265,3 +265,21 @@ function playAgain():void{
         }
     }
 }
+
+//we want to now add the background toggle option. we track it with a background image boolean
+var backgroundImage: boolean=true;
+function toggleBackground():void{
+
+    //we check if the background is true, we then switch it
+    if(backgroundImage == true){ 
+        backgroundImage = false;
+        document.body.style.backgroundImage = "none";
+
+        
+    }
+    else{
+        document.body.style.backgroundImage = "url('blackjack_table.png')";
+        backgroundImage = true;
+    }
+
+}
