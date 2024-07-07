@@ -27,3 +27,7 @@ body{
     border-radius: 2px;
     border-color:black;
 }
+
+#background_toggle{
+    position:absolute; top:0px; right:0px;
+}
