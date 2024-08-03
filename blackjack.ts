@@ -18,22 +18,27 @@ function randomNumGen(maximum): number{
 /**
  * We will create the object of the players. this contains an array and the numerical value. 
  */
+
 interface Player{
     cardTotal: number;
-    obtainedCards: number[];
+    obtainedCards: Card[];
 }
 
+interface Card{
+    cardValue: number;
+    cardSuit: string;
+}
 var Player: Player ={cardTotal: 0 ,obtainedCards:[]};
 var dealer: Player ={cardTotal: 0 ,obtainedCards:[]};
-
+var dealtCards: Card[]=[];
 for(let i = 0; i < 3; i++){
     if(i!=2){
-        addToCards(Player);
+        addToCards(Player,dealtCards);
         console.log("added to player total");
         console.log(Player.cardTotal);
     }
     else{
-        addToCards(dealer);
+        addToCards(dealer,dealtCards);
         console.log("added to dealer total");
         console.log(dealer.cardTotal);
     }
@@ -46,18 +51,24 @@ var buyInForm = document.getElementById('chipsWagered') as HTMLFormElement;
  * This adds numbers into the array, and subsiquently, into the total cards.
  * If the number is 1, then it will be set to 11 if it would allow for it to be added
  */
-function addToCards(player:Player): void{
-    let newCard:number= randomNumGen(11);
-
-    if(newCard == 1 && player.cardTotal + newCard < 22){
-        newCard=11;
+function addToCards(player:Player, dealtCards:Card[]): void{
+    let cardNum:number= randomNumGen(11);
+    let suit: string[] = ["Hearts", "Diamonds","Spades", "Clubs"];
+    let thisCard: Card = {cardValue:cardNum, cardSuit:suit[randomNumGen(4)-1]};
+    if(hasCard(dealtCards,thisCard)){
+        addToCards(player, dealtCards);
     }
-    player.cardTotal = player.cardTotal + newCard;
-    
+    else{
+    if((thisCard.cardValue == 1 && player.cardTotal + thisCard.cardValue < 22)){
+        thisCard.cardValue=11;
+    }
+    player.cardTotal = player.cardTotal + thisCard.cardValue;
     if(player.cardTotal > 21){
         checkOverflow(player);
     }
-    player.obtainedCards.push(newCard); 
+    player.obtainedCards.push(thisCard); 
+    dealtCards.push(thisCard);
+    } 
 }
 
 /**
@@ -66,13 +77,12 @@ function addToCards(player:Player): void{
  */
 
 function checkOverflow(player:Player): void{
-    var index: number= player.obtainedCards.indexOf(11);
-    if(index !== -1){
-        Array[index]=1;
+    if(hasAce(player.obtainedCards)){
         player.cardTotal=player.cardTotal-10; 
     }
     console.log("ADJUSTED FOR ACE");
 }
+
 
 /**
  * We listen for the event of the form being submitted. once this is the case, it prevents the site from refreshing, then we change the value of the user's chips. 
@@ -119,8 +129,8 @@ function showGame(): void{
     else{
         document.getElementById('playerCards').textContent= "Player Score: " + `${Player.cardTotal}`;
     }
-    document.getElementById('playerTotal').textContent= "Player has: " + `${Player.obtainedCards}`;
-    document.getElementById('dealerTotal').textContent= "Dealer has: " + `${dealer.obtainedCards}`;
+    document.getElementById('playerTotal').textContent= "Player has: " + `${cardHand(Player.obtainedCards)}`;
+    document.getElementById('dealerTotal').textContent= "Dealer has: " + `${cardHand(dealer.obtainedCards)}`;
  
     chipText= "Chips: " + `${playerChips}`;
     document.getElementById('chipTotal').textContent = chipText; //we get the chipTotal id. 
@@ -139,7 +149,7 @@ function showGame(): void{
  */
 
 function draw(): void{
-    addToCards(Player);
+    addToCards(Player,dealtCards);
 
     /**
      * if the player busts, we wont let them draw. 
@@ -151,7 +161,7 @@ function draw(): void{
     else{
         document.getElementById('playerCards').textContent= "Player Score: " + `${Player.cardTotal}`;
     }
-    document.getElementById('playerTotal').textContent= "Player has: " + `${Player.obtainedCards}`;
+    document.getElementById('dealerTotal').textContent= "Dealer has: " + `${cardHand(Player.obtainedCards)}`;
  
 
 }
@@ -200,11 +210,9 @@ function stand(): void{
  */
 function dealerDraw(): void{
     while(dealer.cardTotal < 17){
-    let newCard:number= randomNumGen(11);
-    dealer.cardTotal = dealer.cardTotal + newCard;
-    dealer.obtainedCards.push(newCard); 
+    addToCards(dealer,dealtCards);
     document.getElementById('dealerCards').textContent= "Dealer Score: " + `${dealer.cardTotal}`;
-    document.getElementById('dealerTotal').textContent= "Dealer has: " + `${dealer.obtainedCards}`;
+    document.getElementById('dealerTotal').textContent= "Dealer has: " + cardHand(dealer.obtainedCards);
     }
     
     compareHands();
@@ -241,6 +249,7 @@ function compareHands(): void{
     Player.obtainedCards=[];
     dealer.cardTotal=0;
     dealer.obtainedCards=[];
+    
     document.getElementById('playAgain').style.display='block';
 
 }
@@ -254,12 +263,12 @@ function playAgain():void{
     showWager(); //we allow the user to wager again.
     for(let i = 0; i < 3; i++){
         if(i!=2){
-            addToCards(Player);
+            addToCards(Player, dealtCards);
             console.log("added to player total");
             console.log(Player.cardTotal);
         }
         else{
-            addToCards(dealer);
+            addToCards(dealer,dealtCards);
             console.log("added to dealer total");
             console.log(dealer.cardTotal);
         }
@@ -270,12 +279,12 @@ function playAgain():void{
 var backgroundImage: number=0;
 function toggleBackground():void{
 
-
-
     switch(backgroundImage){
         case 0:
             backgroundImage++;
             document.body.style.backgroundImage = "none";
+            document.body.style.backgroundColor = "white";
+
             break;
         case 1:
             backgroundImage++;
@@ -284,9 +293,61 @@ function toggleBackground():void{
             document.body.style.color = "white";
             break;
         default:
-            backgroundImage = 0;
+            backgroundImage = -1;
+            backgroundImage++;
+            document.body.style.color = "black";
             document.body.style.backgroundImage = "url('blackjack_table.png')";
             break;
 
     }
+}
+
+
+var backgroundFont: number=0; 
+//similarly, we will do the same for the font toggling. there will be much less lines of code as this is easier to execute.
+function toggleFont():void {
+    switch (backgroundFont) {
+        case 0:
+            backgroundFont++;
+            document.body.style.fontFamily = "Papyrus, fantasy";
+            break;
+        case 1:
+            backgroundFont++;
+            document.body.style.fontFamily = "Garamond, serif";
+            break;
+        case 2:
+            backgroundFont++;
+            document.body.style.fontFamily = "Helvetica, sans-serif";
+            break;
+        default:
+            backgroundFont = -1;
+            backgroundFont++;
+            document.body.style.fontFamily = "Courier New, monospace";
+            break;
+    }
+}
+
+//we check to see if the card has been drawn already. This is becasue the contains function is not available for objects. 
+function hasCard(cards:Card[],newCard:Card){
+    return cards.some(c=> c.cardValue === newCard.cardValue && c.cardSuit === newCard.cardSuit);
+}
+
+//this is how we confirm if the card is an ace.
+function hasAce(cards:Card[]){
+    cards.forEach(element => {
+        if(element.cardValue == 11){
+            element.cardValue =1;
+            return true;
+        }
+    });
+    return false;
+}
+
+//we check the hand, and change the displayed content accordingly
+function cardHand(cards: Card[]): string{
+    var str = " ";
+    for(let i = 0; i < cards.length; i++){
+        str+= cards[i].cardValue.toString() + " of " + cards[i].cardSuit + " ";
+    }
+    return str;
 }

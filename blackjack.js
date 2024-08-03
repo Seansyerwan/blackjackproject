@@ -15,14 +15,15 @@ function randomNumGen(maximum) {
 }
 var Player = { cardTotal: 0, obtainedCards: [] };
 var dealer = { cardTotal: 0, obtainedCards: [] };
+var dealtCards = [];
 for (var i = 0; i < 3; i++) {
     if (i != 2) {
-        addToCards(Player);
+        addToCards(Player, dealtCards);
         console.log("added to player total");
         console.log(Player.cardTotal);
     }
     else {
-        addToCards(dealer);
+        addToCards(dealer, dealtCards);
         console.log("added to dealer total");
         console.log(dealer.cardTotal);
     }
@@ -33,25 +34,31 @@ var buyInForm = document.getElementById('chipsWagered');
  * This adds numbers into the array, and subsiquently, into the total cards.
  * If the number is 1, then it will be set to 11 if it would allow for it to be added
  */
-function addToCards(player) {
-    var newCard = randomNumGen(11);
-    if (newCard == 1 && player.cardTotal + newCard < 22) {
-        newCard = 11;
+function addToCards(player, dealtCards) {
+    var cardNum = randomNumGen(11);
+    var suit = ["Hearts", "Diamonds", "Spades", "Clubs"];
+    var thisCard = { cardValue: cardNum, cardSuit: suit[randomNumGen(4) - 1] };
+    if (hasCard(dealtCards, thisCard)) {
+        addToCards(player, dealtCards);
     }
-    player.cardTotal = player.cardTotal + newCard;
-    if (player.cardTotal > 21) {
-        checkOverflow(player);
+    else {
+        if ((thisCard.cardValue == 1 && player.cardTotal + thisCard.cardValue < 22)) {
+            thisCard.cardValue = 11;
+        }
+        player.cardTotal = player.cardTotal + thisCard.cardValue;
+        if (player.cardTotal > 21) {
+            checkOverflow(player);
+        }
+        player.obtainedCards.push(thisCard);
+        dealtCards.push(thisCard);
     }
-    player.obtainedCards.push(newCard);
 }
 /**
  * We check for if the overflow has an 11 in the array.
  * Splice works as follows ...(starting index, the amount of things to delete,, and things to insert)
  */
 function checkOverflow(player) {
-    var index = player.obtainedCards.indexOf(11);
-    if (index !== -1) {
-        Array[index] = 1;
+    if (hasAce(player.obtainedCards)) {
         player.cardTotal = player.cardTotal - 10;
     }
     console.log("ADJUSTED FOR ACE");
@@ -97,8 +104,8 @@ function showGame() {
     else {
         document.getElementById('playerCards').textContent = "Player Score: " + "".concat(Player.cardTotal);
     }
-    document.getElementById('playerTotal').textContent = "Player has: " + "".concat(Player.obtainedCards);
-    document.getElementById('dealerTotal').textContent = "Dealer has: " + "".concat(dealer.obtainedCards);
+    document.getElementById('playerTotal').textContent = "Player has: " + "".concat(cardHand(Player.obtainedCards));
+    document.getElementById('dealerTotal').textContent = "Dealer has: " + "".concat(cardHand(dealer.obtainedCards));
     chipText = "Chips: " + "".concat(playerChips);
     document.getElementById('chipTotal').textContent = chipText; //we get the chipTotal id. 
     document.getElementById('draw').style.display = 'inline-block';
@@ -113,7 +120,7 @@ function showGame() {
  * goes above 21, then set the number to be itself less 10, and replace the 11 in the array.
  */
 function draw() {
-    addToCards(Player);
+    addToCards(Player, dealtCards);
     /**
      * if the player busts, we wont let them draw.
      */
@@ -124,7 +131,7 @@ function draw() {
     else {
         document.getElementById('playerCards').textContent = "Player Score: " + "".concat(Player.cardTotal);
     }
-    document.getElementById('playerTotal').textContent = "Player has: " + "".concat(Player.obtainedCards);
+    document.getElementById('dealerTotal').textContent = "Dealer has: " + "".concat(cardHand(Player.obtainedCards));
 }
 /**
  * Doubling down: you draw one final time, while also doubling the amount of chips previously bet; if one bet 200 chips, we now increase that bet to 400.
@@ -162,11 +169,9 @@ function stand() {
  */
 function dealerDraw() {
     while (dealer.cardTotal < 17) {
-        var newCard = randomNumGen(11);
-        dealer.cardTotal = dealer.cardTotal + newCard;
-        dealer.obtainedCards.push(newCard);
+        addToCards(dealer, dealtCards);
         document.getElementById('dealerCards').textContent = "Dealer Score: " + "".concat(dealer.cardTotal);
-        document.getElementById('dealerTotal').textContent = "Dealer has: " + "".concat(dealer.obtainedCards);
+        document.getElementById('dealerTotal').textContent = "Dealer has: " + cardHand(dealer.obtainedCards);
     }
     compareHands();
 }
@@ -208,12 +213,12 @@ function playAgain() {
     showWager(); //we allow the user to wager again.
     for (var i = 0; i < 3; i++) {
         if (i != 2) {
-            addToCards(Player);
+            addToCards(Player, dealtCards);
             console.log("added to player total");
             console.log(Player.cardTotal);
         }
         else {
-            addToCards(dealer);
+            addToCards(dealer, dealtCards);
             console.log("added to dealer total");
             console.log(dealer.cardTotal);
         }
@@ -226,6 +231,7 @@ function toggleBackground() {
         case 0:
             backgroundImage++;
             document.body.style.backgroundImage = "none";
+            document.body.style.backgroundColor = "white";
             break;
         case 1:
             backgroundImage++;
@@ -234,8 +240,55 @@ function toggleBackground() {
             document.body.style.color = "white";
             break;
         default:
-            backgroundImage = 0;
+            backgroundImage = -1;
+            backgroundImage++;
+            document.body.style.color = "black";
             document.body.style.backgroundImage = "url('blackjack_table.png')";
             break;
     }
+}
+var backgroundFont = 0;
+//similarly, we will do the same for the font toggling. there will be much less lines of code as this is easier to execute.
+function toggleFont() {
+    switch (backgroundFont) {
+        case 0:
+            backgroundFont++;
+            document.body.style.fontFamily = "Papyrus, fantasy";
+            break;
+        case 1:
+            backgroundFont++;
+            document.body.style.fontFamily = "Garamond, serif";
+            break;
+        case 2:
+            backgroundFont++;
+            document.body.style.fontFamily = "Helvetica, sans-serif";
+            break;
+        default:
+            backgroundFont = -1;
+            backgroundFont++;
+            document.body.style.fontFamily = "Courier New, monospace";
+            break;
+    }
+}
+//we check to see if the card has been drawn already. This is becasue the contains function is not available for objects. 
+function hasCard(cards, newCard) {
+    return cards.some(function (c) { return c.cardValue === newCard.cardValue && c.cardSuit === newCard.cardSuit; });
+}
+//this is how we confirm if the card is an ace.
+function hasAce(cards) {
+    cards.forEach(function (element) {
+        if (element.cardValue == 11) {
+            element.cardValue = 1;
+            return true;
+        }
+    });
+    return false;
+}
+//we check the hand, and change the displayed content accordingly
+function cardHand(cards) {
+    var str = " ";
+    for (var i = 0; i < cards.length; i++) {
+        str += cards[i].cardValue.toString() + " of " + cards[i].cardSuit + " ";
+    }
+    return str;
 }
