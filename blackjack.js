@@ -288,7 +288,12 @@ function hasAce(cards) {
 function cardHand(cards) {
     var str = " ";
     for (var i = 0; i < cards.length; i++) {
-        str += cards[i].cardValue.toString() + " of " + cards[i].cardSuit + " ";
+        if (cards[i].cardValue === 1 || cards[i].cardValue === 11) {
+            str += "Ace of " + cards[i].cardSuit + " ";
+        }
+        else {
+            str += cards[i].cardValue.toString() + " of " + cards[i].cardSuit + " ";
+        }
     }
     return str;
 }
