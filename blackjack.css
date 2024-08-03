@@ -1,8 +1,11 @@
 *{
-    font-family:cursive;
+    font-family:"Courier New", monospace;
 }
 
-
+button{
+    color:#FDD1CC;
+    background: #FA8072;
+}
 div, form{
     display:none;
 }
@@ -15,13 +18,9 @@ body{
 }
 
 
-#start, #submit{
-    color:rgb(43, 180, 61);
-    background: rgb(255, 238, 0);
-}
 
 .numberText{
-    color:aqua;
+    color:#04aabd;
 }
 .game{
     border:2px;
@@ -29,6 +28,14 @@ body{
     border-color:black;
 }
 
+#background_toggle, #font_toggle{
+    position:absolute; right:0px;
+}
+
 #background_toggle{
-    position:absolute; top:0px; right:0px;
+    top:0px;
+}
+
+#font_toggle{
+    top:23px;
 }
